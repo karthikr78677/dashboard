@@ -1,67 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://dashboard-iw6y.onrender.com';
+// • If VITE_API_URL is *not* set in prod, same‑origin fetch avoids CORS headaches.
+const API_BASE =
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') || window.location.origin;
+
 const AddProduct = () => {
   const [name,  setName]  = useState('');
   const [cost,  setCost]  = useState('');
   const [desc,  setDesc]  = useState('');
   const [img,   setImg]   = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleFile   = (e) => setImg(e.target.files[0]);
+  // Create & revoke the local preview URL so we don’t leak memory
+  useEffect(() => {
+    if (!img) { setPreviewURL(null); return; }
+    const url = URL.createObjectURL(img);
+    setPreviewURL(url);
+    return () => URL.revokeObjectURL(url);
+  }, [img]);
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image 📷');
+      return;
+    }
+    setImg(file);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
 
     const fd = new FormData();
-    fd.append('name',        name);
-    fd.append('cost',        cost);
-    fd.append('description', desc);
+    fd.append('name', name.trim());
+    fd.append('cost', Number(cost));          // send numeric type
+    fd.append('description', desc.trim());
     if (img) fd.append('image', img);
 
     try {
-      const { data } = await axios.post(`${API_BASE}/api/products`, fd);
+      const { data } = await axios.post(`${API_BASE}/api/products`, fd, {
+        withCredentials: true               // keeps you safe if you switch to cookie auth
+      });
 
-      if (data.success) {
-        alert('✅ Product added');
+      console.log('→ server response', data);
+
+      if (data?.success) {
+        alert('✅ Product added!');
         setName(''); setCost(''); setDesc(''); setImg(null);
       } else {
-        alert('❌ Upload failed');
+        alert(data?.message || 'Upload failed');
       }
     } catch (err) {
-      console.error(err);
-      alert('Server error — check console');
+      if (err.response) {
+        // We reached the server but it replied with an error JSON/HTML
+        console.error('[SERVER]', err.response.status, err.response.data);
+        alert(err.response.data?.message || `Server error (${err.response.status})`);
+      } else {
+        console.error('[NETWORK]', err);
+        alert('Network / CORS error – see console');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">New Product</h2>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <h2 className="text-xl font-bold mb-4">Add New Product</h2>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          type="text"
-          placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
           className="border p-2 rounded"
           required
         />
 
         <input
           type="number"
-          placeholder="Cost (₹)"
           value={cost}
           onChange={(e) => setCost(e.target.value)}
+          placeholder="Cost (₹)"
           className="border p-2 rounded"
           required
         />
 
-        <input
-          type="text"
-          placeholder="Description"
+        <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          className="border p-2 rounded"
+          placeholder="Description"
+          rows="3"
+          className="border p-2 rounded resize-none"
         />
 
         <input
@@ -71,16 +106,22 @@ const AddProduct = () => {
           className="border p-2 rounded"
         />
 
-        {img && (
+        {previewURL && (
           <img
-            src={URL.createObjectURL(img)}
+            src={previewURL}
             alt="Preview"
-            className="w-32 h-32 object-cover rounded"
+            className="w-32 h-32 object-cover rounded self-center"
           />
         )}
 
-        <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-          Upload
+        <button
+          type="submit"
+          disabled={loading}
+          className={`bg-blue-500 text-white p-2 rounded hover:bg-blue-600 ${
+            loading ? 'opacity-60 cursor-not-allowed' : ''
+          }`}
+        >
+          {loading ? 'Uploading…' : 'Upload'}
         </button>
       </form>
     </div>
