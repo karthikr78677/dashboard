@@ -3,12 +3,23 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+
+  /* ⬇️ NEW: Tell Render (and anyone using `npm install`) to use Node 20.x */
+  "engines": {
+    "node": ">=20 <21"
+  },
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+
+    /* ⬇️ NEW: makes Render’s “Start command” just `npm run start` */
+    "start": "vite preview --port ${PORT:-4173}",
+
     "lint": "eslint .",
     "preview": "vite preview"
   },
+
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.10.0",
