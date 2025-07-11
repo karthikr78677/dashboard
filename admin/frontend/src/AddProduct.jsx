@@ -20,9 +20,7 @@ const AddProduct = () => {
     if (img) fd.append('image', img);
 
     try {
-      const { data } = await axios.post(`${API_BASE}/api/products`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const { data } = await axios.post(`${API_BASE}/api/products`, fd);
 
       if (data.success) {
         alert('✅ Product added');
