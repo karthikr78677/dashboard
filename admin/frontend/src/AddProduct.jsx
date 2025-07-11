@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
+const API_BASE = import.meta.env.VITE_API_URL || 'https://dashboard-iw6y.onrender.com';
 const AddProduct = () => {
   const [name,  setName]  = useState('');
   const [cost,  setCost]  = useState('');
