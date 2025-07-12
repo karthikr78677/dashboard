@@ -1,39 +1,51 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
-const API_BASE =  'http://localhost:3001';
+// const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_BASE = "http://localhost:3001";
 
 const AddProduct = () => {
-  const [name,  setName]  = useState('');
-  const [cost,  setCost]  = useState('');
-  const [desc,  setDesc]  = useState('');
-  const [img,   setImg]   = useState(null);
-
-  const handleFile   = (e) => setImg(e.target.files[0]);
+  const [name, setName] = useState("");
+  const [cost, setCost] = useState("");
+  const [desc, setDesc] = useState("");
+  const [img,  setImg]  = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const fd={
+
+    // Build multipart body
+    // const fd = new FormData();
+    // fd.append("name", name);
+    // fd.append("cost", Number(cost));        // make sure it's numeric
+    // fd.append("description", desc);
+    // if (img) fd.append("image", img);       // field name MUST be "image"
+const fd={
       name,
       cost,
       description: desc,
-    }
+      image:img
+}
     try {
-      const { data } = await axios.post(`${API_BASE}/api/products`, fd);
+      const { data } = await axios.post(`${API_BASE}/api/products`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+        // const { data } = await axios.post(`${API_BASE}/api/products`, fd); // it dosent work bcz in the server to upload a image ,upload.single("image") which can accept only the "multipart/form-data"
 
       if (data.success) {
-        alert('✅ Product added');
-        
+        alert("✅ Product added");
       } else {
-        alert('❌ Upload failed');
+        alert("❌ Upload failed");
       }
     } catch (err) {
       console.error(err);
-      alert('Server error — check console');
+      alert("Server error — check console");
     }
-    setName('');
-    setCost('');
-    setDesc('');
+
+    // reset form
+    setName("");
+    setCost("");
+    setDesc("");
     setImg(null);
   };
 
@@ -70,7 +82,7 @@ const AddProduct = () => {
         <input
           type="file"
           accept="image/*"
-          onChange={handleFile}
+          onChange={(e) => setImg(e.target.files[0])}
           className="border p-2 rounded"
         />
 
@@ -91,4 +103,3 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
-
