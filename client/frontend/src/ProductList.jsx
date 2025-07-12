@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+// Change just one line here if you deploy elsewhere
+// const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_BASE =  "http://localhost:3001";
+
+const imgURL = (relative) =>
+  `${API_BASE}/${relative.replace(/^[\\/]/, "").replace(/\\/g, "/")}`;
+
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState('');
+  const [error,    setError]    = useState("");
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get('/api/products');
+        const { data } = await axios.get(`${API_BASE}/api/products`);
         if (data.success) setProducts(data.data);
-        else throw new Error(data.message || 'Unknown error');
+        else throw new Error(data.message || "Unknown error");
       } catch (err) {
-        console.error('Fetch error:', err);
+        console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -25,11 +33,10 @@ const ProductList = () => {
 
   return (
     <div className="max-w-3xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {products.map(p => (
+      {products.map((p) => (
         <div key={p._id} className="border rounded shadow p-4">
           <img
-            /* Works whether p.image is "/uploads/xyz.png" or "uploads/xyz.png" */
-            src={new URL(p.image, API_BASE || window.location.origin).href}
+            src={imgURL(p.image)}
             alt={p.name}
             className="w-full h-40 object-cover rounded"
             loading="lazy"
