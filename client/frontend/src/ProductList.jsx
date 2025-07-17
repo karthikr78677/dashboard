@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 // const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
-const API_BASE = "https://dashboard-admin-backend-tqiy.onrender.com";
+const API_BASE = "http://localhost:3001";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +32,7 @@ const ProductList = () => {
       {products.map((p) => (
         <div key={p._id} className="border rounded shadow p-4">
           <img
-            src={p.image} // ✅ use direct image URL from Cloudinary
+            src={p.images} // ✅ use direct image URL from Cloudinary
             alt={p.name}
             className="w-full h-40 object-cover rounded"
             loading="lazy"
