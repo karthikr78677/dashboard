@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-// Change just one line here if you deploy elsewhere
 // const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
- const API_BASE =  "https://dashboard-admin-backend-tqiy.onrender.com";
-//const API_BASE = import.meta.env.VITE_API_URL ||  "https://dashboard-admin-backend-tqiy.onrender.com";
-
-const imgURL = (relative) =>
-  `${API_BASE}/${relative.replace(/^[\\/]/, "").replace(/\\/g, "/")}`;
+const API_BASE = "http://localhost:3001";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -30,14 +25,14 @@ const ProductList = () => {
   }, []);
 
   if (loading) return <p className="text-center mt-10">Loading…</p>;
-  if (error)   return <p className="text-center mt-10 text-red-600">{error}</p>;
+  if (error) return <p className="text-center mt-10 text-red-600">{error}</p>;
 
   return (
     <div className="max-w-3xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {products.map((p) => (
         <div key={p._id} className="border rounded shadow p-4">
           <img
-            src={imgURL(p.image)}
+            src={p.image} // ✅ use direct image URL from Cloudinary
             alt={p.name}
             className="w-full h-40 object-cover rounded"
             loading="lazy"
