@@ -1,36 +1,49 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-// const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
-const API_BASE = "https://dashboard-admin-backend-tqiy.onrender.com";
+const API_BASE = "http://localhost:3001";
 
 const AddProduct = () => {
   const [name, setName] = useState("");
   const [cost, setCost] = useState("");
   const [desc, setDesc] = useState("");
-  const [img,  setImg]  = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+
+  async function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "cricketball");
+    data.append("cloud_name", "diuukkwgo");
+
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/diuukkwgo/image/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const uploaded = await res.json();
+      console.log("Uploaded URL:", uploaded.url);
+      setImageUrl(uploaded.url);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Build multipart body
-    // const fd = new FormData();
-    // fd.append("name", name);
-    // fd.append("cost", Number(cost));        // make sure it's numeric
-    // fd.append("description", desc);
-    // if (img) fd.append("image", img);       // field name MUST be "image"
-const fd={
+    const productData = {
       name,
-      cost,
+      cost: Number(cost),
       description: desc,
-      image:img
-}
-    try {
-      const { data } = await axios.post(`${API_BASE}/api/products`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      image: imageUrl,
+    };
 
-        // const { data } = await axios.post(`${API_BASE}/api/products`, fd); // it dosent work bcz in the server to upload a image ,upload.single("image") which can accept only the "multipart/form-data"
+    try {
+      const { data } = await axios.post(`${API_BASE}/api/products`, productData);
 
       if (data.success) {
         alert("✅ Product added");
@@ -42,11 +55,11 @@ const fd={
       alert("Server error — check console");
     }
 
-    // reset form
+    // Reset form
     setName("");
     setCost("");
     setDesc("");
-    setImg(null);
+    setImageUrl(null);
   };
 
   return (
@@ -79,22 +92,31 @@ const fd={
           className="border p-2 rounded"
         />
 
+        {/* Placeholder for future category logic */}
+        <select className="border p-2 rounded">
+          <option value="bats">Bats</option>
+          <option disabled>+ Add category (feature coming soon)</option>
+        </select>
+
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setImg(e.target.files[0])}
+          onChange={handleFileChange}
           className="border p-2 rounded"
         />
 
-        {img && (
+        {imageUrl && (
           <img
-            src={URL.createObjectURL(img)}
+            src={imageUrl}
             alt="Preview"
             className="w-32 h-32 object-cover rounded"
           />
         )}
 
-        <button className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        >
           Upload
         </button>
       </form>
