@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = "https://dashboard-admin-backend-tqiy.onrender.com";
 
 const AddProduct = () => {
   const [name, setName] = useState("");
